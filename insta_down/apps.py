@@ -1,5 +1,5 @@
 from django.apps import AppConfig
 
 
-class DownInstaConfig(AppConfig):
+class InstaDownConfig(AppConfig):
     name = 'insta_down'
