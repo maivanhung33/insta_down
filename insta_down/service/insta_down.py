@@ -1,4 +1,5 @@
 from django.http import JsonResponse
+from rest_framework.decorators import api_view
 
 import insta_down.response.post as post_response
 from insta_down.model.data_crawl import DataCrawl
@@ -6,10 +7,9 @@ from insta_down.module.insta_api import InstaAPI
 from insta_down.module.validator import Validator
 
 
+@api_view(['POST'])
 def download_post(request):
     # validate
-    if request.method != 'GET':
-        return JsonResponse(data={"message": "Method not allow"}, status=405)
     validator = Validator('link')
     short_code = validator.validate_post()
     short_code = 'B-pTcmQn5I1'
@@ -41,10 +41,9 @@ def download_post(request):
         content_type='application/json', status=200)
 
 
+@api_view(['POST'])
 def download_album(request):
     # validate
-    if request.method != 'POST':
-        return JsonResponse(data={"message": "Method not allow"}, status=405)
     validator = Validator('link')
     user_id = validator.validate_profile()
 
