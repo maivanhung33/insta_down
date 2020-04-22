@@ -25,10 +25,12 @@ def download_post(request):
     data = [dict(
         id=response['data']['shortcode_media']['id'],
         url=response['data']['shortcode_media']['display_url'],
+        height=response['data']['shortcode_media']['dimensions']['height'],
+        width=response['data']['shortcode_media']['dimensions']['width'],
+        thumbnail=response['data']['shortcode_media']['display_resources'][0]['src'],
         shortcode=response['data']['shortcode_media']['shortcode'],
-        count_like=response['data']['shortcode_media']['edge_media_preview_like']['count'],
-        count_comment=response['data']['shortcode_media']['edge_media_to_comment']['count'],
-        thumbnail_url=response['data']['shortcode_media']['display_url'])]
+        countLike=response['data']['shortcode_media']['edge_media_preview_like']['count'],
+        countComment=response['data']['shortcode_media']['edge_media_to_comment']['count'])]
 
     data_crawl = DataCrawl(
         id=id,
@@ -37,7 +39,7 @@ def download_post(request):
     data_crawl.save(force_insert=True)
 
     return JsonResponse(
-        data=post_response.to_dict(id, owner, data),
+        data=post_response.to_dict(id=id, owner=owner, data=data),
         content_type='application/json', status=200)
 
 

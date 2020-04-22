@@ -5,12 +5,14 @@ class ItemCrawl(models.Model):
     id = models.IntegerField(primary_key=True)
     # url of pic
     url = models.TextField()
+    height = models.IntegerField()
+    width = models.IntegerField()
     # thumbnail of pic (if list choose size minimum)
-    thumbnail_url = models.TextField()
+    thumbnail = models.TextField()
     # count comment of pic
-    count_comment = models.IntegerField()
+    countComment = models.IntegerField()
     # count like of pic
-    count_like = models.IntegerField()
+    countLike = models.IntegerField()
     # short-code of pic
     shortcode = models.TextField()
 
