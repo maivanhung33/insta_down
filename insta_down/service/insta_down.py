@@ -1,16 +1,17 @@
-from django.http import JsonResponse, HttpResponseBadRequest
+from django.http import JsonResponse
+
 from insta_down.model.data_crawl import DataCrawl, Owner, ItemCrawl
 from insta_down.module.insta_api import InstaAPI
 from insta_down.module.validator import Validator
 
 
 def download_post(request):
-    # do sth
+    # validate
     validator = Validator('link')
-    if not validator.validate_post():
-        raise HttpResponseBadRequest(status=400, reason='link is not correct')
+    short_code = validator.validate_post()
+
+    # processing
     insta_api = InstaAPI()
-    short_code = validator.get_short_code()
     response = insta_api.get_post(short_code)
     data = DataCrawl()
     data.id = response['data']['shortcode_media']['id']
@@ -26,3 +27,12 @@ def download_post(request):
         thumbnail_url=response['data']['shortcode_media']['display_url'])]
     data.save()
     return JsonResponse(data.to_dict(), content_type='application/json')
+
+
+def download_album(request):
+    # validate
+    validator = Validator('link')
+    user_id = validator.validate_profile()
+
+    # processing
+    pass

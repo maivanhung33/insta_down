@@ -11,14 +11,10 @@ class Validator:
 
     def validate_post(self):
         pass
-        return True
+        # return shortcode if link is post link of instagram else Raise BadRequest Exception
+        return
 
     def validate_profile(self):
         pass
-        return True
-
-    def get_short_code(self):
-        return 'B-pTcmQn5I1'
-
-    def get_url(self):
-        return self.__url
+        # return userId if link is profile of user else Raise BadRequest Exception
+        return

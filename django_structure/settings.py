@@ -91,8 +91,8 @@ DATABASES = {
             'CLIENT': {
                 'host': 'localhost',
                 'port': 27017,
-                'username': 'meete',
-                'password': 'p4ssw0rd',
+                'username': 'username',
+                'password': 'pass',
                 'authSource': 'mongo',
                 'authMechanism': 'SCRAM-SHA-256'
             }

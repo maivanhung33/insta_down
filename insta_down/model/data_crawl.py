@@ -36,7 +36,7 @@ class Owner(models.Model):
 
 
 class DataCrawl(models.Model):
-    # id user or post
+    # id userId or post short-code
     id = models.IntegerField(primary_key=True)
     # info of owner
     owner = models.EmbeddedField(Owner)
