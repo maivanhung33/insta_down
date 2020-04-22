@@ -2,7 +2,7 @@ from djongo import models
 
 
 class ItemCrawl(models.Model):
-    id = models.IntegerField(primary_key=True)
+    id = models.TextField(primary_key=True)
     # url of pic
     url = models.TextField()
     height = models.IntegerField()
@@ -19,7 +19,7 @@ class ItemCrawl(models.Model):
 
 class Owner(models.Model):
     # id user
-    id = models.IntegerField(primary_key=True)
+    id = models.TextField(primary_key=True)
     # avatar user
     avatar = models.TextField()
     # username user
@@ -27,8 +27,8 @@ class Owner(models.Model):
 
 
 class DataCrawl(models.Model):
-    # id userId or post short-code
-    id = models.IntegerField(primary_key=True)
+    # id userId or post id
+    id = models.TextField(primary_key=True, unique=True)
     # info of owner
     owner = models.EmbeddedField(Owner)
     # list data crawl

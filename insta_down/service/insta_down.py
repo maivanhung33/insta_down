@@ -36,7 +36,7 @@ def download_post(request):
         id=id,
         owner=owner,
         data=data)
-    data_crawl.save(force_insert=True)
+    data_crawl.save()
 
     return JsonResponse(
         data=post_response.to_dict(id=id, owner=owner, data=data),
