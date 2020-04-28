@@ -33,3 +33,5 @@ class DataCrawl(models.Model):
     owner = models.EmbeddedField(Owner)
     # list data crawl
     data = models.ArrayField(ItemCrawl)
+    # Count images
+    count = models.PositiveIntegerField()

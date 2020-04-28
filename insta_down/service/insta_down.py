@@ -27,6 +27,7 @@ def download_post(request):
         name=response['data']['shortcode_media']['owner']['username'])
     
     data = []
+    count = 0
 
     if response['data']['shortcode_media']['__typename'] == 'GraphSidecar': #More than one photo/video in this post
         for item in response['data']['shortcode_media']['edge_sidecar_to_children']['edges']:
@@ -40,6 +41,7 @@ def download_post(request):
                         shortcode=item['node']['shortcode'],
                         countLike=response['data']['shortcode_media']['edge_media_preview_like']['count'],
                         countComment=response['data']['shortcode_media']['edge_media_to_comment']['count']))
+                    count += 1
     
     elif response['data']['shortcode_media']['__typename'] == 'GraphImage': # Has only one photo
         data = [dict(
@@ -51,6 +53,7 @@ def download_post(request):
             shortcode=response['data']['shortcode_media']['shortcode'],
             countLike=response['data']['shortcode_media']['edge_media_preview_like']['count'],
             countComment=response['data']['shortcode_media']['edge_media_to_comment']['count'])]
+        count += 1
     
     else:
         print("No image found!")
@@ -65,7 +68,8 @@ def download_post(request):
     data_crawl = DataCrawl(
         id=id,
         owner=owner,
-        data=data)
+        data=data,
+        count=count)
     data_crawl.save()
 
     return JsonResponse(
@@ -91,6 +95,7 @@ def download_album(request):
     )
 
     data = []
+    count = 0
 
     end_cursor = ''
     while (end_cursor != None):
@@ -107,6 +112,7 @@ def download_album(request):
                     shortcode=item['node']['shortcode'],
                     countLike=item['node']['edge_media_preview_like']['count'],
                     countComment=item['node']['edge_media_to_comment']['count'])) 
+                count += 1
             
             elif item['node']['__typename'] == 'GraphSidecar': #More than one photo/video in this post
                 for node_item in item['node']['edge_sidecar_to_children']['edges']:
@@ -119,7 +125,8 @@ def download_album(request):
                             thumbnail=node_item['node']['display_resources'][0]['src'],
                             shortcode=item['node']['shortcode'],
                             countLike=item['node']['edge_media_preview_like']['count'],
-                            countComment=item['node']['edge_media_to_comment']['count'])) 
+                            countComment=item['node']['edge_media_to_comment']['count']))
+                        count += 1 
         
         end_cursor = response2['data']['user']['edge_owner_to_timeline_media']['page_info']['end_cursor']
 
@@ -133,7 +140,8 @@ def download_album(request):
     data_crawl = DataCrawl(
         id=id,
         owner=owner,
-        data=data)
+        data=data,
+        count=count)
     data_crawl.save()
 
     return JsonResponse(
