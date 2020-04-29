@@ -1,5 +1,5 @@
 from insta_down.module.insta_api import InstaAPI
-import requests
+from django.core.exceptions import ValidationError
 
 class Validator:
     __url: str
@@ -12,20 +12,17 @@ class Validator:
     def validate_post(self):
         # return shortcode if link is post link of instagram else Raise BadRequest Exception
         short_code = self.__url.split("/")
-        if (short_code[3] == "p") and (len(short_code) == 6):
+        if (short_code[3] == "p") and (len(short_code) == 6) and (short_code[2] == "www.instagram.com"):
             return short_code[4]
         else: 
-            pass
+            raise ValidationError("Bad request")
 
     def validate_profile(self):
         # return userId if link is profile of user else Raise BadRequest Exception
         url = self.__url
-        if url[-1:] != '/':
-            url += '/'
-        url = url + "?__a=1"
-        try: 
-            data = requests.get(url).json()
-            user_id = data["logging_page_id"].replace("profilePage_", "")
-            return user_id
-        except:
-            pass
+        checkProfile = url.split("/")
+        if (len(checkProfile) == 5) and (checkProfile[2] == "www.instagram.com"):
+            userName = checkProfile[3]
+            return userName
+        else:
+            raise ValidationError("Bad request")
