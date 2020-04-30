@@ -26,3 +26,13 @@ class Validator:
             return userName
         else:
             raise ValidationError("Bad request")
+
+    def Validator(self, link):
+        #return url if the link is from Instagram else Raise BadRequest Exception
+        url = link
+        checkURL = url.split('/')
+        if (checkURL[2] == 'www.instagram.com'):
+            self.__url = url
+            return self.__url
+        else:
+            raise ValidationError('Bad request')
