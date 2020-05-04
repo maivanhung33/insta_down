@@ -1,6 +1,6 @@
 from insta_down.module.insta_api import InstaAPI
 from django.core.exceptions import ValidationError
-
+import requests
 class Validator:
     __url: str
     __insta_api: InstaAPI
@@ -29,10 +29,13 @@ class Validator:
 
     def Validator(self, link):
         #return url if the link is from Instagram else Raise BadRequest Exception
-        url = link
-        checkURL = url.split('/')
-        if (checkURL[2] == 'www.instagram.com'):
-            self.__url = url
-            return self.__url
+        url = link.split('/')
+        if (url[2] == "www.instagram.com"):
+            check = requests.get(link)
+            if (check.status_code == 200):
+                self.__url = link
+                return self.__url
+            else:
+                raise ValidationError("Bad request")
         else:
             raise ValidationError('Bad request')
