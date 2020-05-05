@@ -1,4 +1,4 @@
 djongo
 djangorestframework
-request
+requests
 gunicorn
