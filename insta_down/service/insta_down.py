@@ -3,8 +3,6 @@ from datetime import datetime
 
 import pytz
 from django.http import JsonResponse
-from django.http import QueryDict
-from rest_framework.decorators import api_view
 
 import insta_down.response.post as post_response
 from insta_down.model.data_crawl import DataCrawl
@@ -12,9 +10,10 @@ from insta_down.module.insta_api import InstaAPI
 from insta_down.module.validator import Validator
 
 
-@api_view(['POST'])
 def download_post(request):
     # validate
+    if request.method != 'POST':
+        return JsonResponse(data={"message": "Method not allow"}, status=405)
     body: dict = json.loads(request.body.decode('utf-8'))
     if 'url' not in body.keys():
         return JsonResponse(data={'message': 'must have url'},
@@ -81,8 +80,10 @@ def download_post(request):
         content_type='application/json', status=200)
 
 
-@api_view(['POST'])
 def download_album(request):
+    # validate
+    if request.method != 'POST':
+        return JsonResponse(data={"message": "Method not allow"}, status=405)
     body: dict = json.loads(request.body.decode('utf-8'))
     if 'url' not in body.keys():
         return JsonResponse(data={'message': 'must have url'},
