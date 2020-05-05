@@ -40,8 +40,8 @@ class InstaAPI:
     def get_post(self, short_code):
         url = self.BASE_URL + r'?query_hash=a92f76e852576a71d3d7cef4c033a95e&variables=%7B%22shortcode%22%3A%22'
         url += str(short_code) + r'%22%7D'
-        return requests.get(url, headers=self.__header, timeout=1.5).json()
+        return requests.get(url, headers=self.__header).json()
 
     def get_user_info(self, user_name):
         url = self.USER_INFO_URL + str(user_name) + r'/?__a=1'
-        return requests.get(url, headers=self.__header, timeout=1.5).json()
+        return requests.get(url, headers=self.__header).json()

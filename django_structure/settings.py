@@ -93,14 +93,12 @@ DATABASES = {
                 }
             },
         },
-        'NAME': 'mongo',
+        'NAME': 'insta_down',
         'CLIENT': {
-            'host': 'localhost',
+            'host': 'mongodb+srv://cluster0-zdecn.gcp.mongodb.net',
             'port': 27017,
-            'username': 'meete',
-            'password': 'p4ssw0rd',
-            'authSource': 'mongo',
-            'authMechanism': 'SCRAM-SHA-256'
+            'username': 'hung',
+            'password': 'maivanhung33',
         }
     }
 }
