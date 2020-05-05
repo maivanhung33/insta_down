@@ -1,3 +1,4 @@
 djongo
 djangorestframework
 request
+gunicorn
