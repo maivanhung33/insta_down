@@ -7,19 +7,30 @@ from django.http import JsonResponse
 import insta_down.response.post as post_response
 from insta_down.model.data_crawl import DataCrawl
 from insta_down.module.insta_api import InstaAPI
-from insta_down.module.validator import Validator
+from insta_down.module.insta_validator import InstaValidator
+from insta_down.response.error_response import BAD_REQUEST, METHOD_NOT_ALLoW, MUST_HAVE_URL
 
 
 def download_post(request):
     # validate
     if request.method != 'POST':
-        return JsonResponse(data={"message": "Method not allow"}, status=405)
-    body: dict = json.loads(request.body.decode('utf-8'))
-    if 'url' not in body.keys():
-        return JsonResponse(data={'message': 'must have url'},
-                            content_type='application/json', status=400)
-    validator = Validator(body['url'])
-    short_code = validator.validate_url_post()
+        return METHOD_NOT_ALLoW
+    try:
+        body: dict = json.loads(request.body.decode('utf-8'))
+        if 'url' not in body.keys():
+            return MUST_HAVE_URL
+    except Exception as e:
+        print(e)
+        return BAD_REQUEST
+
+    validator = InstaValidator(body['url'])
+    temp = validator.validate_url()
+    if not temp['status']:
+        return temp['response']
+    temp = validator.validate_url_post()
+    if not temp['status']:
+        return temp['response']
+    short_code = temp['response']
 
     # processing
     insta_api = InstaAPI()
@@ -61,8 +72,7 @@ def download_post(request):
 
     else:
         data = [dict(
-            message="no image found"
-        )]
+            message="no image found")]
         return JsonResponse(
             data=post_response.to_dict(id=id, owner=owner, data=data),
             content_type='application/json', status=400)
@@ -83,16 +93,24 @@ def download_post(request):
 def download_album(request):
     # validate
     if request.method != 'POST':
-        return JsonResponse(data={"message": "Method not allow"}, status=405)
-    body: dict = json.loads(request.body.decode('utf-8'))
-    if 'url' not in body.keys():
-        return JsonResponse(data={'message': 'must have url'},
-                            content_type='application/json', status=400)
-    validator = Validator(body['url'])
-    validator.validate_url()
-    user_name = validator.validate_url_profile()
-    # user_name = 'kygomusic'  # This line is temporary.
+        return METHOD_NOT_ALLoW
+    try:
+        body: dict = json.loads(request.body.decode('utf-8'))
+        if 'url' not in body.keys():
+            return MUST_HAVE_URL
+    except Exception as e:
+        print(e)
+        return BAD_REQUEST
 
+    validator = InstaValidator(body['url'])
+    temp = validator.validate_url()
+    if not temp['status']:
+        return temp['response']
+
+    temp = validator.validate_url_profile()
+    if not temp['status']:
+        return temp['response']
+    user_name = temp['response']
     # processing
     insta_api = InstaAPI()
     response = insta_api.get_user_info(user_name)
@@ -100,52 +118,44 @@ def download_album(request):
     owner = dict(
         id=id,
         avatar=response['graphql']['user']['profile_pic_url'],
-        name=response['graphql']['user']['username']
-    )
+        name=response['graphql']['user']['username'])
 
     data = []
     count = 0
 
     end_cursor = ''
-    while (end_cursor != None):
-        response2 = insta_api.get_posts(id, end_cursor)
+    while end_cursor is not None:
+        response = insta_api.get_posts(id, end_cursor)
+        edges = response['data']['user']['edge_owner_to_timeline_media']['edges']
+        if len(edges) != 0:
+            for item in edges:
+                if item['node']['__typename'] == 'GraphImage':  # One photo/video in this post
+                    data.append(dict(
+                        id=item['node']['id'],
+                        url=item['node']['display_url'],
+                        height=item['node']['dimensions']['height'],
+                        width=item['node']['dimensions']['width'],
+                        thumbnail=item['node']['thumbnail_src'],
+                        shortcode=item['node']['shortcode'],
+                        countLike=item['node']['edge_media_preview_like']['count'],
+                        countComment=item['node']['edge_media_to_comment']['count']))
+                    count += 1
 
-        for item in response2['data']['user']['edge_owner_to_timeline_media']['edges']:
-            if item['node']['__typename'] == 'GraphImage':  # One photo/video in this post
-                data.append(dict(
-                    id=item['node']['id'],
-                    url=item['node']['display_url'],
-                    height=item['node']['dimensions']['height'],
-                    width=item['node']['dimensions']['width'],
-                    thumbnail=item['node']['thumbnail_src'],
-                    shortcode=item['node']['shortcode'],
-                    countLike=item['node']['edge_media_preview_like']['count'],
-                    countComment=item['node']['edge_media_to_comment']['count']))
-                count += 1
+                elif item['node']['__typename'] == 'GraphSidecar':  # More than one photo/video in this post
+                    for node_item in item['node']['edge_sidecar_to_children']['edges']:
+                        if node_item['node']['__typename'] == 'GraphImage':
+                            data.append(dict(
+                                id=node_item['node']['id'],
+                                url=node_item['node']['display_url'],
+                                height=node_item['node']['dimensions']['height'],
+                                width=node_item['node']['dimensions']['width'],
+                                thumbnail=node_item['node']['display_resources'][0]['src'],
+                                shortcode=item['node']['shortcode'],
+                                countLike=item['node']['edge_media_preview_like']['count'],
+                                countComment=item['node']['edge_media_to_comment']['count']))
+                            count += 1
 
-            elif item['node']['__typename'] == 'GraphSidecar':  # More than one photo/video in this post
-                for node_item in item['node']['edge_sidecar_to_children']['edges']:
-                    if node_item['node']['__typename'] == 'GraphImage':
-                        data.append(dict(
-                            id=node_item['node']['id'],
-                            url=node_item['node']['display_url'],
-                            height=node_item['node']['dimensions']['height'],
-                            width=node_item['node']['dimensions']['width'],
-                            thumbnail=node_item['node']['display_resources'][0]['src'],
-                            shortcode=item['node']['shortcode'],
-                            countLike=item['node']['edge_media_preview_like']['count'],
-                            countComment=item['node']['edge_media_to_comment']['count']))
-                        count += 1
-
-        end_cursor = response2['data']['user']['edge_owner_to_timeline_media']['page_info']['end_cursor']
-
-        ''' # Function below is useless because the same function is in insta_api.get_posts()
-        if end_cursor is not None:
-            # Remove the last = in the end_cursor
-            end_cursor = end_cursor.replace("=", "")
-            # Append  == at last by url encode
-            end_cursor += '%3D%3D' '''
-
+        end_cursor = response['data']['user']['edge_owner_to_timeline_media']['page_info']['end_cursor']
     data_crawl = DataCrawl(
         id=id,
         owner=owner,
