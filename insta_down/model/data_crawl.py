@@ -34,6 +34,6 @@ class DataCrawl(models.Model):
     # list data crawl
     data = models.ArrayField(ItemCrawl)
     # Count images
-    count = models.PositiveIntegerField()
+    count = models.IntegerField()
     # ExpireAt
     _expireAt = models.DateTimeField()

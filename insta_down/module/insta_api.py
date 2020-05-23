@@ -47,5 +47,5 @@ class InstaAPI:
         url = self.USER_INFO_URL + str(user_name) + r'/?__a=1'
         response = requests.get(url)
         print(response.status_code)
-        print(response.content)
+        print(response.text.encode('utf-8'))
         return requests.get(url).json()
