@@ -1,39 +1,40 @@
-from djongo import models
+from datetime import datetime
+from typing import List
+
+from dataclasses import dataclass
 
 
-class ItemCrawl(models.Model):
-    id = models.TextField(primary_key=True)
+@dataclass
+class ItemCrawl:
+    id: str
     # url of pic
-    url = models.TextField()
-    height = models.IntegerField()
-    width = models.IntegerField()
+    url: str
+    height: int
+    width: int
     # thumbnail of pic (if list choose size minimum)
-    thumbnail = models.TextField()
+    thumbnail: str
     # count comment of pic
-    countComment = models.IntegerField()
+    countComment: int
     # count like of pic
-    countLike = models.IntegerField()
+    countLike: int
     # short-code of pic
-    shortcode = models.TextField()
+    shortcode: str
 
 
-class Owner(models.Model):
+@dataclass
+class Owner:
     # id user
-    id = models.TextField(primary_key=True)
+    id: str
     # avatar user
-    avatar = models.TextField()
+    avatar: str
     # username user
-    name = models.TextField()
+    name: str
 
 
-class DataCrawl(models.Model):
-    # id userId or post id
-    id = models.TextField(primary_key=True, unique=True)
-    # info of owner
-    owner = models.EmbeddedField(Owner)
-    # list data crawl
-    data = models.ArrayField(ItemCrawl)
-    # Count images
-    count = models.IntegerField()
-    # ExpireAt
-    _expireAt = models.DateTimeField()
+@dataclass
+class DataCrawl:
+    id: str
+    count: int
+    owner: dict
+    data: List[dict]
+    _expire_at: datetime

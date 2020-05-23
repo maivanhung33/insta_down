@@ -69,28 +69,7 @@ WSGI_APPLICATION = 'django_structure.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/2.2/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'djongo',
-        'ENFORCE_SCHEMA': False,
-        'LOGGING': {
-            'version': 1,
-            'loggers': {
-                'djongo': {
-                    'level': 'DEBUG',
-                    'propogate': False,
-                }
-            },
-        },
-        'NAME': 'insta_down',
-        'CLIENT': {
-            'host': 'mongodb+srv://cluster0-zdecn.gcp.mongodb.net',
-            'port': 27017,
-            'username': 'hung',
-            'password': 'maivanhung33',
-        }
-    }
-}
+DATABASES = {}
 
 # Password validation
 # https://docs.djangoproject.com/en/2.2/ref/settings/#auth-password-validators
