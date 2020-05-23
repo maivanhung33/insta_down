@@ -10,8 +10,8 @@ class InstaAPI:
     USER_INFO_URL = "https://www.instagram.com/"
 
     def __init__(self):
-        self.__header = {'cookie': 'sessionid=5711537494%3AsqShow1gFBehyH%3A22;',
-                         'user-agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.122 Safari/537.36'}
+        self.__header = {
+            'user-agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.122 Safari/537.36'}
         self.__payload = {}
         self.__query_param = {}
         self.__url = ''
@@ -45,7 +45,6 @@ class InstaAPI:
 
     def get_user_info(self, user_name):
         url = self.USER_INFO_URL + str(user_name) + r'/?__a=1'
-        response=requests.get(url)
+        response = requests.get(url)
         print(response.status_code)
-        print(response.text)
         return requests.get(url).json()
