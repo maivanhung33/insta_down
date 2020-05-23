@@ -1,11 +1,9 @@
-import logging
 import os
 
 from pymongo import MongoClient
 
 
 def database() -> MongoClient:
-    logging.info('init db')
     host = os.environ.get('MONGO_HOST') or 'localhost'
 
     port = os.environ.get('MONGO_PORT') or 27017
@@ -31,5 +29,4 @@ def database() -> MongoClient:
                                                                                         password,
                                                                                         host,
                                                                                         db))[db]
-    logging.info('finish init db')
     return client
