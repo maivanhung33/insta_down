@@ -36,12 +36,12 @@ class InstaAPI:
         url = self.BASE_URL + r'?query_hash=e769aa130647d2354c40ea6a439bfc08&variables=%7B%22id%22%3A%22'
         url += str(user_id) + r'%22%2C%22first%22%3A50%2C%22after%22%3A%22'
         url += str(cursor) + r'%22%7D'
-        return requests.get(url, headers=self.__header).json()
+        return requests.get(url).json()
 
     def get_post(self, short_code):
         url = self.BASE_URL + r'?query_hash=a92f76e852576a71d3d7cef4c033a95e&variables=%7B%22shortcode%22%3A%22'
         url += str(short_code) + r'%22%7D'
-        return requests.get(url, headers=self.__header).json()
+        return requests.get(url).json()
 
     def get_user_info(self, user_name):
         url = self.USER_INFO_URL + str(user_name) + r'/?__a=1'
