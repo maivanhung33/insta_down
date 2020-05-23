@@ -1,11 +1,8 @@
 import json
-from datetime import datetime
 
-import pytz
 from django.http import JsonResponse
 
 import insta_down.response.post as post_response
-from insta_down.model.data_crawl import DataCrawl
 from insta_down.module.insta_api import InstaAPI
 from insta_down.module.insta_validator import InstaValidator
 from insta_down.response.error_response import BAD_REQUEST, METHOD_NOT_ALLoW, MUST_HAVE_URL
@@ -77,13 +74,13 @@ def download_post(request):
             data=post_response.to_dict(id=id, owner=owner, data=data),
             content_type='application/json', status=400)
 
-    data_crawl = DataCrawl(
-        id=id,
-        owner=owner,
-        data=data,
-        count=count,
-        _expireAt=datetime.now(pytz.timezone('Asia/Ho_Chi_Minh')))
-    data_crawl.save()
+    # data_crawl = DataCrawl(
+    #     id=id,
+    #     owner=owner,
+    #     data=data,
+    #     count=count,
+    #     _expireAt=datetime.now(pytz.timezone('Asia/Ho_Chi_Minh')))
+    # data_crawl.save()
 
     return JsonResponse(
         data=post_response.to_dict(id=id, owner=owner, data=data),
@@ -156,13 +153,13 @@ def download_album(request):
                             count += 1
 
         end_cursor = response['data']['user']['edge_owner_to_timeline_media']['page_info']['end_cursor']
-    data_crawl = DataCrawl(
-        id=id,
-        owner=owner,
-        data=data,
-        count=count,
-        _expireAt=datetime.now(pytz.timezone('Asia/Ho_Chi_Minh')))
-    data_crawl.save()
+    # data_crawl = DataCrawl(
+    #     id=id,
+    #     owner=owner,
+    #     data=data,
+    #     count=count,
+    #     _expireAt=datetime.now(pytz.timezone('Asia/Ho_Chi_Minh')))
+    # data_crawl.save()
 
     return JsonResponse(
         data=post_response.to_dict(id=id, owner=owner, data=data),
