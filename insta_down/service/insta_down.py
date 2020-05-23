@@ -83,7 +83,7 @@ def download_post(request):
         data=data,
         count=count,
         _expireAt=datetime.now(pytz.timezone('Asia/Ho_Chi_Minh')))
-    # data_crawl.save()
+    data_crawl.save()
 
     return JsonResponse(
         data=post_response.to_dict(id=id, owner=owner, data=data),
