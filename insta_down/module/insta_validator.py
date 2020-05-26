@@ -1,7 +1,7 @@
 import requests
 
 from insta_down.module.insta_api import InstaAPI
-from insta_down.response.error_response import VALIDATE_ERROR
+from insta_down.response.error_response import VALIDATE_ERROR, NOT_FOUND
 
 
 class InstaValidator:
@@ -41,7 +41,7 @@ class InstaValidator:
         if url[2] == "www.instagram.com":
             check = requests.get(self.__url)
             if check.status_code != 200:
-                return self.VALIDATE_ERROR
+                return self.NOT_FOUND
         else:
             return self.VALIDATE_ERROR
         return self.set_response(None)
