@@ -7,6 +7,8 @@ from insta_down.response.error_response import VALIDATE_ERROR, NOT_FOUND
 class InstaValidator:
     VALIDATE_ERROR = dict(status=False,
                           response=VALIDATE_ERROR)
+    NOT_FOUND = dict(status=False,
+                     response=NOT_FOUND)
     __url: str
     __insta_api: InstaAPI
 
