@@ -179,10 +179,10 @@ def download_album(request):
                                 countLike=item['node']['edge_media_preview_like']['count'],
                                 countComment=item['node']['edge_media_to_comment']['count']))
                             count += 1
-
         end_cursor = response['data']['user']['edge_owner_to_timeline_media']['page_info']['end_cursor']
+
     data_crawl = DataCrawl(
-        id=id,
+        id=user_name,
         owner=owner.__dict__,
         data=data,
         count=count,
