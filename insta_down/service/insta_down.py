@@ -1,22 +1,23 @@
 import json
+import os
 from datetime import datetime
 
 import pytz
 from django.http import JsonResponse
 
-import insta_down.response.post as post_response
+import insta_down.response.data_crawl as data_crawl_response
 from insta_down.model.data_crawl import DataCrawl, Owner, ItemCrawl
 from insta_down.module.insta_api import InstaAPI
 from insta_down.module.insta_validator import InstaValidator
 from insta_down.module.mongo_client import database
-from insta_down.response.error_response import BAD_REQUEST, METHOD_NOT_ALLoW, MUST_HAVE_URL
+from insta_down.response.error import BAD_REQUEST, METHOD_NOT_ALLoW, MUST_HAVE_URL
 
 db = database()
-COL = 'insta_down_datacrawl'
+COL = os.environ.get('COL') or 'insta_down_datacrawl'
 
 
 def download_post(request):
-    # validate
+    # validate request
     if request.method != 'POST':
         return METHOD_NOT_ALLoW
     try:
@@ -27,29 +28,31 @@ def download_post(request):
         print(e)
         return BAD_REQUEST
 
+    # validate link
     validator = InstaValidator(body['url'])
     temp = validator.validate_url()
     if not temp['status']:
         return temp['response']
+
+    # get shortcode
     temp = validator.validate_url_post()
     if not temp['status']:
         return temp['response']
     short_code = temp['response']
 
-    # processing
+    # process
     insta_api = InstaAPI()
-    response = insta_api.get_post(short_code)
-    id = response['data']['shortcode_media']['id']
-
+    id = short_code
     old_data = db[COL].find_one({'id': id}, {'_id': 0})
     if old_data is not None:
         return JsonResponse(
-            data=post_response.to_dict(
-                id=id,
+            data=data_crawl_response.to_dict(
                 owner=old_data['owner'],
                 count=old_data['count'],
                 data=old_data['data']),
             content_type='application/json', status=200)
+
+    response = insta_api.get_post(short_code)
     owner = Owner(
         id=response['data']['shortcode_media']['owner']['id'],
         avatar=response['data']['shortcode_media']['owner']['profile_pic_url'],
@@ -86,7 +89,7 @@ def download_post(request):
     else:
         data = [dict(message="no image found")]
         return JsonResponse(
-            data=post_response.to_dict(id=id, owner=owner, data=data),
+            data=data_crawl_response.to_dict(owner=owner, data=data, count=count),
             content_type='application/json', status=400)
 
     data_crawl = DataCrawl(
@@ -98,7 +101,7 @@ def download_post(request):
     db[COL].insert(data_crawl.__dict__)
 
     return JsonResponse(
-        data=post_response.to_dict(id=id, count=count, owner=owner.__dict__, data=data),
+        data=data_crawl_response.to_dict(count=count, owner=owner.__dict__, data=data),
         content_type='application/json', status=200)
 
 
@@ -125,20 +128,19 @@ def download_album(request):
     user_name = temp['response']
 
     # processing
-    insta_api = InstaAPI()
-    response = insta_api.get_user_info(user_name)
-    id = response['graphql']['user']['id']
 
-    old_data = db[COL].find_one({'id': id}, {'_id': 0})
+    old_data = db[COL].find_one({'id': user_name}, {'_id': 0})
     if old_data is not None:
         return JsonResponse(
-            data=post_response.to_dict(
-                id=id,
+            data=data_crawl_response.to_dict(
                 owner=old_data['owner'],
                 count=old_data['count'],
                 data=old_data['data']),
             content_type='application/json', status=200)
 
+    insta_api = InstaAPI()
+    response = insta_api.get_user_info(user_name)
+    id = response['graphql']['user']['id']
     owner = Owner(
         id=id,
         avatar=response['graphql']['user']['profile_pic_url'],
@@ -188,5 +190,5 @@ def download_album(request):
     db[COL].insert(data_crawl.__dict__)
 
     return JsonResponse(
-        data=post_response.to_dict(id=id, count=count, owner=owner.__dict__, data=data),
+        data=data_crawl_response.to_dict(count=count, owner=owner.__dict__, data=data),
         content_type='application/json', status=200)

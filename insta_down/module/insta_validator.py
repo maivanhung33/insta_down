@@ -1,7 +1,7 @@
 import requests
 
 from insta_down.module.insta_api import InstaAPI
-from insta_down.response.error_response import VALIDATE_ERROR, NOT_FOUND
+from insta_down.response.error import VALIDATE_ERROR, NOT_FOUND
 
 
 class InstaValidator:
