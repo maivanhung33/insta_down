@@ -44,4 +44,4 @@ class InstaAPI:
     def get_user_info(self, user_name):
         url = self.USER_INFO_URL + str(user_name) + r'/?__a=1'
         data = requests.get(url, headers=self.__header)
-        return data
+        return data.json()
