@@ -18,14 +18,12 @@ class InstaAPI:
 
     def set_header(self, key: str, value):
         self.__header[key] = value
-        print(self.__header)
 
     def set_body(self, data: dict):
         self.__payload = data
 
     def set_param(self, k: str, v: str):
         self.__query_param[k] = v
-        print(self.__query_param)
 
     def set_url(self, url: str):
         self.__url = url
@@ -45,5 +43,6 @@ class InstaAPI:
 
     def get_user_info(self, user_name):
         url = self.USER_INFO_URL + str(user_name) + r'/?__a=1'
-        response = requests.get(url)
+        print(requests.get(url).status_code)
+        print(requests.get(url).text)
         return requests.get(url).json()
