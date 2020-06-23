@@ -38,3 +38,8 @@ class DataCrawl:
     owner: dict
     data: List[dict]
     _expire_at: datetime
+
+@dataclass
+class User:
+    username: str
+    password: str
