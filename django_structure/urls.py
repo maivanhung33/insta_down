@@ -15,8 +15,11 @@ Including another URLconf
 """
 # from django.contrib import admin
 from django.urls import path, include
+from insta_down.service import insta_down as service
 
 urlpatterns = [
     #    path('admin/', admin.site.urls),
-    path('download/', include('insta_down.controller.insta_down'))
+    path('download/', include('insta_down.controller.insta_down')),
+    path('register/', service.register, name='register'),
+    path('login/', service.login, name='login'),
 ]
