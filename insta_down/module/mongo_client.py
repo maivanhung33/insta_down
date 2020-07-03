@@ -21,12 +21,12 @@ def database() -> MongoClient:
     auth_mechanism = os.environ.get('MONGO_AUTH_MECHANISM') or 'SCRAM-SHA-256'
 
     # For local
-    client = MongoClient(host=host, port=port, username=username, password=password, maxPoolSize=max_pool_size,
-                         authMechanism=auth_mechanism, authSource=auth_source)[db]
+    # client = MongoClient(host=host, port=port, username=username, password=password, maxPoolSize=max_pool_size,
+    #                      authMechanism=auth_mechanism, authSource=auth_source)[db]
 
     # For cloud
-    # client = MongoClient("mongodb+srv://{}:{}@{}/{}?retryWrites=true&w=majority".format(username,
-    #                                                                                     password,
-    #                                                                                     host,
-    # db))[db]
+    client = MongoClient("mongodb+srv://{}:{}@{}/{}?retryWrites=true&w=majority".format(username,
+                                                                                        password,
+                                                                                        host,
+                                                                                        db))[db]
     return client
