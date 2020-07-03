@@ -4,5 +4,6 @@ from insta_down.service import user
 
 urlpatterns = [
     path('register', user.register, name='register'),
-    path('login', user.login, name='login')
+    path('login', user.login, name='login'),
+    path('info', user.info, name='info')
 ]

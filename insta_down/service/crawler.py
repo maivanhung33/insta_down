@@ -1,25 +1,29 @@
 import json
 import os
+import jwt
 from datetime import datetime
 
 import pytz
 from django.http import JsonResponse
 
 import insta_down.response.data_crawl as data_crawl_response
-from insta_down.model.data_crawl import DataCrawl, Owner, ItemCrawl
+from insta_down.model.data_crawl import DataCrawl, Owner, ItemCrawl, User, InstaLike
 from insta_down.module.insta_api import InstaAPI
 from insta_down.module.insta_validator import InstaValidator
 from insta_down.module.mongo_client import database
-from insta_down.response.error import BAD_REQUEST, METHOD_NOT_ALLoW, MUST_HAVE_URL
+from insta_down.response.error import BAD_REQUEST, METHOD_NOT_ALLOW, MUST_HAVE_URL, NOT_ENOUGH_INFO, MUST_LOGIN, \
+    TOKEN_EXPIRED
 
 db = database()
 COL = os.environ.get('COL') or 'insta_down_datacrawl'
+COL_USER = os.environ.get('COL_USER') or 'insta_down_data_user'
+SECRET = 'nhomt@m-nt208.k21.antt'
 
 
 def download_post(request):
     # validate request
     if request.method != 'POST':
-        return METHOD_NOT_ALLoW
+        return METHOD_NOT_ALLOW
     try:
         body: dict = json.loads(request.body.decode('utf-8'))
         if 'url' not in body.keys():
@@ -108,7 +112,7 @@ def download_post(request):
 def download_album(request):
     # validate
     if request.method != 'POST':
-        return METHOD_NOT_ALLoW
+        return METHOD_NOT_ALLOW
     try:
         body: dict = json.loads(request.body.decode('utf-8'))
         if 'url' not in body.keys():
@@ -192,3 +196,42 @@ def download_album(request):
     return JsonResponse(
         data=data_crawl_response.to_dict(count=count, owner=owner.__dict__, data=data),
         content_type='application/json', status=200)
+
+
+def like_pic(request):
+    # validate request
+    if request.method != 'POST':
+        return METHOD_NOT_ALLOW
+    try:
+        body: dict = json.loads(request.body.decode('utf-8'))
+        if 'id' not in body.keys() or 'url' not in body.keys():
+            return NOT_ENOUGH_INFO
+    except Exception as e:
+        print(e)
+        return BAD_REQUEST
+
+    # Get token
+    try:
+        token = request.headers['token']
+    except Exception as e:
+        print(e)
+        return MUST_LOGIN
+
+    # Check token
+    try:
+        data = jwt.decode(jwt=token, key=SECRET, algorithm='HS256')
+    except jwt.ExpiredSignatureError:
+        return TOKEN_EXPIRED
+
+    # get info user
+    username = data['username']
+    is_exits = db[COL_USER].find_one({'insta_like': {'$elemMatch': {'id': body['id']}}}, {'_id': 1})
+    if is_exits is not None:
+        return BAD_REQUEST
+    like = InstaLike(id=body['id'],
+                     url=body['url'],
+                     created_at=int(datetime.now().timestamp()))
+
+    db[COL_USER].update_one({'username': username}, {'$push': {'insta_like': like.__dict__}})
+
+    return JsonResponse(data={'message': 'Success'}, status=200)
