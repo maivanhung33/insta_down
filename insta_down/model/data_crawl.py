@@ -39,7 +39,20 @@ class DataCrawl:
     data: List[dict]
     _expire_at: datetime
 
+
+@dataclass
+class InstaLike:
+    id: str
+    url: str
+    created_at: int
+
+
 @dataclass
 class User:
     username: str
     password: str
+    fullname: str
+    birthday: int
+    phone: str
+    email: str
+    insta_like: List[InstaLike]

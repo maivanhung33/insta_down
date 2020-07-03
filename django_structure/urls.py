@@ -15,9 +15,10 @@ Including another URLconf
 """
 # from django.contrib import admin
 from django.urls import path, include
+from insta_down.service.crawler import like_pic
 
 urlpatterns = [
-    #    path('admin/', admin.site.urls),
     path('download/', include('insta_down.controller.crawler')),
     path('user/', include('insta_down.controller.user')),
+    path('like', like_pic)
 ]

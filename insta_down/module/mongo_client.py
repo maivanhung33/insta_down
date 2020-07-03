@@ -10,9 +10,9 @@ def database() -> MongoClient:
 
     max_pool_size = os.environ.get('MONGO_MAX_POOL_SIZE') or 100
 
-    username = os.environ.get('MONGO_USER') or 'hung'
+    username = os.environ.get('MONGO_USER') or 'meete'
 
-    password = os.environ.get('MONGO_PASSWORD') or 'maivanhung33'
+    password = os.environ.get('MONGO_PASSWORD') or 'p4ssw0rd'
 
     db = os.environ.get('MONGO_DB') or 'mongo'
 
@@ -21,12 +21,12 @@ def database() -> MongoClient:
     auth_mechanism = os.environ.get('MONGO_AUTH_MECHANISM') or 'SCRAM-SHA-256'
 
     # For local
-    # client = MongoClient(host=host, port=port, username=username, password=password, maxPoolSize=max_pool_size,
-    #                      authMechanism=auth_mechanism, authSource=auth_source)[db]
+    client = MongoClient(host=host, port=port, username=username, password=password, maxPoolSize=max_pool_size,
+                         authMechanism=auth_mechanism, authSource=auth_source)[db]
 
     # For cloud
-    client = MongoClient("mongodb+srv://{}:{}@{}/{}?retryWrites=true&w=majority".format(username,
-                                                                                        password,
-                                                                                        host,
-                                                                                        db))[db]
+    # client = MongoClient("mongodb+srv://{}:{}@{}/{}?retryWrites=true&w=majority".format(username,
+    #                                                                                     password,
+    #                                                                                     host,
+    # db))[db]
     return client

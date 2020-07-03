@@ -6,89 +6,113 @@ import time
 import jwt
 from django.http import JsonResponse
 
-import insta_down.response.data_crawl as data_crawl_response
+import insta_down.response.user as user_response
 from insta_down.model.data_crawl import User
 from insta_down.module.mongo_client import database
-from insta_down.response.error import BAD_REQUEST, METHOD_NOT_ALLoW
+from insta_down.response.error import BAD_REQUEST, METHOD_NOT_ALLOW, ALL_READY_EXITS, NOT_ENOUGH_INFO, LOGIN_FAIL, \
+    TOKEN_EXPIRED, MUST_LOGIN
 
 db = database()
 COL_USER = os.environ.get('COL_USER') or 'insta_down_data_user'
 SECRET = 'nhomt@m-nt208.k21.antt'
+TOKEN_EXPIRE = os.environ.get('TOKEN_USER') or 3600
 
 
 def register(request):
     if request.method != 'POST':
-        return METHOD_NOT_ALLoW
+        return METHOD_NOT_ALLOW
 
     try:
         body: dict = json.loads(request.body.decode('utf-8'))
-        if 'username' not in body.keys() or 'password' not in body.keys():
-            return BAD_REQUEST  # Or return validate_error
+        if 'username' not in body.keys() \
+                or 'password' not in body.keys() \
+                or 'birthday' not in body.keys() \
+                or 'email' not in body.keys() \
+                or 'phone' not in body.keys() \
+                or 'fullname' not in body.keys():
+            return NOT_ENOUGH_INFO
     except Exception as e:
         print(e)
-        return BAD_REQUEST
+        return NOT_ENOUGH_INFO
 
     # Check if username exist
-    username = body['username']
-    matches_user = db[COL_USER].find_one({'username': username}, {'_id': 1})
-    if matches_user is not None:  # Exist
-        # print(matches_user['_id']) Chưa get được Password từ user này, nếu ko sẽ phải find 2 lần.
-        return JsonResponse(
-            data={
-                'message': 'Username is already exist'
-            },
-            content_type='application/json', status=400)
+    is_exits = db[COL_USER].find_one({'username': body['username']}, {'_id': 1})
+    if is_exits is not None:  # Exist
+        return ALL_READY_EXITS
     # Not exist -> create new user.
     new_user = User(
-        username=username,
-        password=hashlib.sha256(body['password'].encode('utf-8')).hexdigest()
+        username=body['username'],
+        password=hashlib.sha256(body['password'].encode('utf-8')).hexdigest(),
+        fullname=body['fullname'],
+        birthday=body['birthday'],
+        phone=body['phone'],
+        email=body['email'],
+        insta_like=[]
     )
     db[COL_USER].insert(new_user.__dict__)
-    return JsonResponse(
-        data=data_crawl_response.to_dict(new_user.username, new_user.password),
-        content_type='application/json', status=200)
+    return JsonResponse(data=user_response.to_dict(new_user), status=200)
 
 
 def login(request):
     if request.method != 'POST':
-        return METHOD_NOT_ALLoW
+        return METHOD_NOT_ALLOW
 
     try:
         body: dict = json.loads(request.body.decode('utf-8'))
         if 'username' not in body.keys() or 'password' not in body.keys():
-            return BAD_REQUEST  # Or return validate_error
+            return BAD_REQUEST
     except Exception as e:
         print(e)
         return BAD_REQUEST
 
-    # Check if username exist
+    # login
     username = body['username']
-    matches_user = db[COL_USER].find_one({'username': username}, {'_id': 1})
-    if matches_user is None:  # Not exist
-        return JsonResponse(
-            data={
-                'message': 'Username is not exist'
-            },
-            content_type='application/json', status=404)
-    # Exist -> Compare username, pw to login, generate token
     password = hashlib.sha256(body['password'].encode('utf-8')).hexdigest()
-    logining_user = db[COL_USER].find_one({'username': username, 'password': password}, {'_id': 1})
-    if logining_user is None:  # Incorrect username or password
-        return JsonResponse(
-            data={
-                'message': 'Login failed. Username or password is incorrect.'
-            },
-            content_type='application/json', status=403)
+    logging_user = db[COL_USER].find_one({'username': username, 'password': password}, {'_id': 1})
+    if logging_user is None:
+        return LOGIN_FAIL
+
     # Login successful, generate JWT
-    payload = {
+    now = int(time.time())
+    token_expire_at = now + 3600
+    data = {
         "username": username,
-        "password": password,
-        "start_at": int(time.time()),
-        "exp": int(time.time()) + 3600  # 1 hour
+        "start_at": now,
+        "exp": token_expire_at
     }
+    token = jwt.encode(data, SECRET, algorithm='HS256')
 
-    token = jwt.encode(payload, SECRET, algorithm='HS256')
+    return JsonResponse(data={"message": 'Login successful.', "token": token.decode(), "expireAt": token_expire_at},
+                        status=200)
 
-    return JsonResponse(
-        data={"message": 'Login successful.', "token": token.decode("utf-8")},
-        content_type='application/json', status=200)
+
+def info(request):
+    if request.method != 'GET':
+        return METHOD_NOT_ALLOW
+
+    # Get token
+    try:
+        token = request.headers['token']
+    except Exception as e:
+        print(e)
+        return MUST_LOGIN
+
+    # Check token
+    try:
+        data = jwt.decode(jwt=token, key=SECRET, algorithm='HS256')
+    except jwt.ExpiredSignatureError:
+        return TOKEN_EXPIRED
+
+    # get info user
+    username = data['username']
+    user = db[COL_USER].find_one({'username': username}, {'_id': 0})
+    user = User(
+        username=user['username'],
+        password=user['password'],
+        fullname=user['fullname'],
+        birthday=user['birthday'],
+        phone=user['phone'],
+        email=user['email'],
+        insta_like=user['insta_like']
+    )
+    return JsonResponse(data=user_response.to_dict(user), status=200)
