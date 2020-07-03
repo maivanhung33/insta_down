@@ -4,4 +4,5 @@ requests
 gunicorn
 pymongo
 dnspython
+django-cors-headers
 jwt
