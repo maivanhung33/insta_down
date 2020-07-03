@@ -8,11 +8,15 @@ NOT_ENOUGH_INFO = JsonResponse(data={'message': 'must fill full info'}, status=4
 
 VALIDATE_ERROR = JsonResponse(data={'message': 'Request data error'}, status=400)
 
+HAD_LIKED = JsonResponse(data={'message': 'Pic has been liked before'}, status=400)
+
 ALL_READY_EXITS = JsonResponse(data={'message': 'Username is already exist'}, status=400)
 
 MUST_LOGIN = JsonResponse(data={'message': 'you must login'}, status=401)
 
 TOKEN_EXPIRED = JsonResponse(data={'message': 'token expire'}, status=401)
+
+AUTHENTICATION_FAIL = JsonResponse(data={'message': 'Authentication fail'}, status=401)
 
 LOGIN_FAIL = JsonResponse(data={'message': 'Username or password error'}, status=401)
 

@@ -1,18 +1,18 @@
 import json
 import os
-import jwt
 from datetime import datetime
 
+import jwt
 import pytz
 from django.http import JsonResponse
 
 import insta_down.response.data_crawl as data_crawl_response
-from insta_down.model.data_crawl import DataCrawl, Owner, ItemCrawl, User, InstaLike
+from insta_down.model.data_crawl import DataCrawl, Owner, ItemCrawl, InstaLike
 from insta_down.module.insta_api import InstaAPI
 from insta_down.module.insta_validator import InstaValidator
 from insta_down.module.mongo_client import database
 from insta_down.response.error import BAD_REQUEST, METHOD_NOT_ALLOW, MUST_HAVE_URL, NOT_ENOUGH_INFO, MUST_LOGIN, \
-    TOKEN_EXPIRED
+    TOKEN_EXPIRED, HAD_LIKED
 
 db = database()
 COL = os.environ.get('COL') or 'insta_down_datacrawl'
@@ -227,7 +227,7 @@ def like_pic(request):
     username = data['username']
     is_exits = db[COL_USER].find_one({'insta_like': {'$elemMatch': {'id': body['id']}}}, {'_id': 1})
     if is_exits is not None:
-        return BAD_REQUEST
+        return HAD_LIKED
     like = InstaLike(id=body['id'],
                      url=body['url'],
                      created_at=int(datetime.now().timestamp()))
