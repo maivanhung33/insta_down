@@ -212,7 +212,7 @@ def like_pic(request):
 
     # Get token
     try:
-        token = request.headers['token']
+        token = request.headers['Authorization'].split(' ')[1]
     except Exception as e:
         print(e)
         return MUST_LOGIN
