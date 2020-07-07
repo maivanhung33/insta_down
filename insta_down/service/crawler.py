@@ -225,7 +225,8 @@ def like_pic(request):
 
     # get info user
     username = data['username']
-    is_exits = db[COL_USER].find_one({'insta_like': {'$elemMatch': {'id': body['id']}}}, {'_id': 1})
+    is_exits = db[COL_USER].find_one({'insta_like': {'$elemMatch': {'id': body['id']}},
+                                      'username': username}, {'_id': 1})
     if is_exits is not None:
         return HAD_LIKED
     like = InstaLike(id=body['id'],
